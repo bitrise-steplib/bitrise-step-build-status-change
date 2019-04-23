@@ -1,0 +1,30 @@
+format_version: 7
+default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
+
+app:
+  envs:
+  - BITRISE_APP_SLUG: $BITRISE_APP_SLUG
+  - BITRISE_BUILD_SLUG: $BITRISE_BUILD_SLUG
+  - BITRISE_ACCESS_TOKEN: $BITRISE_ACCESS_TOKEN
+
+workflows:
+  test:
+    before_run: 
+    - audit-this-step
+    steps:
+    - go-list:
+    - golint:
+    - errcheck:
+    - go-test:
+    - path::./:
+        inputs:
+        - access_token: $BITRISE_ACCESS_TOKEN
+
+  audit-this-step:
+    steps:
+    - script:
+        inputs:
+        - content: |-
+            #!/bin/bash
+            set -ex
+            stepman audit --step-yml ./step.yml
