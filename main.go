@@ -48,11 +48,15 @@ func (cfg config) getBuild() (build, error) {
 	if err != nil {
 		return build{}, err
 	}
-	var b struct{ Data build }
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return build{}, err
 	}
+	if resp.StatusCode != 200 {
+		return build{}, fmt.Errorf("invalid response status code: %d\nbody: %s", resp.StatusCode, string(body))
+	}
+
+	var b struct{ Data build }
 	if err := json.Unmarshal(body, &b); err != nil {
 		return build{}, errors.Wrap(err, string(body))
 	}
@@ -79,12 +83,16 @@ func (cfg config) getBuilds(f filter) (builds, error) {
 	if err != nil {
 		return nil, err
 	}
-	var builds struct {
-		Data []build `json:"data"`
-	}
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
+	}
+	if resp.StatusCode != 200 {
+		return builds{}, fmt.Errorf("invalid response status code: %d\nbody: %s", resp.StatusCode, string(body))
+	}
+
+	var builds struct {
+		Data []build `json:"data"`
 	}
 	if err := json.Unmarshal(body, &builds); err != nil {
 		return nil, errors.Wrap(err, string(body))
@@ -102,7 +110,7 @@ type filter struct {
 }
 
 func (f filter) String() string {
-	return fmt.Sprintf("- branch: %s\n- workflow: %s\n- pull request ID: %d\n- event type: %s", f.Branch, f.Workflow, f.PullRequestID, f.TriggerEventType)
+	return fmt.Sprintf("- branch: %s\n- workflow: %s\n- pull request ID: %d\n- event type: %s\n", f.Branch, f.Workflow, f.PullRequestID, f.TriggerEventType)
 }
 
 type build struct {
@@ -159,6 +167,7 @@ func (build build) equivalent(pair build) bool {
 type builds []build
 
 func (builds builds) previous(actualBuild build) (build, error) {
+	// builds is a sorted list because the aPI call has the filter set to do the sorting: SortBy = "created_at"
 	for _, build := range builds {
 		// skip if found the current build or any in-progress ones
 		if build.BuildNumber == actualBuild.BuildNumber || build.Status == 0 {

@@ -1,32 +1,49 @@
 # Build Status Change
 
-Exports environment variables to be able to detect if the currently running build's status has changed to a previous one.
+> Exports environment variables to be able to detect if the currently running build's status has changed to a previous one.
 
+## Inputs
 
-## How to use this Step
+- access_token: __(required)__ __(sensitive)__
+    > Your access token for the account that has access to the Bitrise app.
 
-Can be run directly with the [bitrise CLI](https://github.com/bitrise-io/bitrise),
-just `git clone` this repository, `cd` into it's folder in your Terminal/Command Line
-and call `bitrise run test`.
+## Outputs
 
-*Check the `bitrise.yml` file for required inputs which have to be
-added to your `.bitrise.secrets.yml` file!*
+### Exported Environment variables
 
-Step by step:
+- BUILD_STATUS_CHANGED: Build Status Changed
+    > True if the actual build status is different from the previous one.
+- PREVIOUS_BUILD_STATUS: Previous Build Status
+    > Status text of the previous build.
 
-1. Open up your Terminal / Command Line
-2. `git clone` the repository
-3. `cd` into the directory of the step (the one you just `git clone`d)
-5. Create a `.bitrise.secrets.yml` file in the same directory of `bitrise.yml`
-   (the `.bitrise.secrets.yml` is a git ignored file, you can store your secrets in it)
-6. Check the `bitrise.yml` file for any secret you should set in `.bitrise.secrets.yml`
-  * Best practice is to mark these options with something like `# define these in your .bitrise.secrets.yml`, in the `app:envs` section.
-7. Once you have all the required secret parameters in your `.bitrise.secrets.yml` you can just run this step with the [bitrise CLI](https://github.com/bitrise-io/bitrise): `bitrise run test`
+## Contribute
 
-An example `.bitrise.secrets.yml` file:
+1. Fork this repository
+1. Make changes
+1. Submit a PR
 
-```
-envs:
-- A_SECRET_PARAM_ONE: the value for secret one
-- A_SECRET_PARAM_TWO: the value for secret two
-```
+## How to run this step from source
+
+1. Clone this repository
+1. `cd` to the cloned repository's root
+1. Create a bitrise.yml (if not yet created)
+1. Prepare a workflow that contains a step with the id: `path::./`
+    > For example:
+    > ```yaml
+    > format_version: "6"
+    > default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
+    > 
+    > workflows:
+    >   my-workflow:
+    >     steps:
+    >     - path::./:
+    >         inputs: 
+    >         - my_input: "my input value"
+    > ```
+1. Run the workflow: `bitrise run my-workflow`
+
+## About
+This is an official Step managed by Bitrise.io and is available in the [Workflow Editor](https://www.bitrise.io/features/workflow-editor) and in our [Bitrise CLI](https://github.com/bitrise-io/bitrise) tool. If you seen something in this readme that never before please visit some of our knowledge base to read more about that:
+  - devcenter.bitrise.io
+  - discuss.bitrise.io
+  - blog.bitrise.io
