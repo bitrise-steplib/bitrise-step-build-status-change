@@ -1,0 +1,37 @@
+title: Build Status Change
+summary: Exports environment variables to be able to detect if the currently running build's status has changed to a previous one.
+description: Exports environment variables to be able to detect if the currently running build's status has changed to a previous one.
+website: https://github.com/bitrise-steplib/bitrise-step-build-status-change
+source_code_url: https://github.com/bitrise-steplib/bitrise-step-build-status-change
+support_url: https://github.com/bitrise-steplib/bitrise-step-build-status-change/issues
+
+type_tags:
+  - utility
+
+is_always_run: true
+is_skippable: true
+
+toolkit:
+  go:
+    package_name: github.com/bitrise-steplib/bitrise-step-build-status-change
+
+inputs:
+  - access_token:
+    opts:
+      title: Bitrise Access Token
+      summary: Your access token for the account that has access to the Bitrise app.
+      description: Your access token for the account that has access to the Bitrise app.
+      is_required: true
+      is_secret: true
+
+outputs:
+  - BUILD_STATUS_CHANGED:
+    opts:
+      title: "Build Status Changed"
+      summary: True if the actual build status is different from the previous one.
+      description: True if the actual build status is different from the previous one.
+  - PREVIOUS_BUILD_STATUS:
+    opts:
+      title: "Previous Build Status"
+      summary: Status text of the previous build.
+      description: Status text of the previous build.
