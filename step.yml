@@ -22,7 +22,7 @@ inputs:
       summary: Your access token for the account that has access to the Bitrise app.
       description: Your access token for the account that has access to the Bitrise app.
       is_required: true
-      is_secret: true
+      is_sensitive: true
 
 outputs:
   - BUILD_STATUS_CHANGED:
