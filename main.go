@@ -149,7 +149,7 @@ func (build build) buildType() string {
 	switch {
 	case build.Tag != "":
 		return buildTypeTag
-	case *build.PullRequestID > 0 || (build.PullRequestTargetBranch != ""):
+		case (build.PullRequestID != nil && *build.PullRequestID > 0) || (build.PullRequestTargetBranch != ""):
 		return buildTypePullRequest
 	case build.CommitHash == "":
 		return buildTypeManual
