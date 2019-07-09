@@ -134,7 +134,7 @@ func (build build) generateFilter() filter {
 		Workflow: build.TriggeredWorkflow,
 		Branch:   build.Branch,
 		Before:   int(build.TriggeredAt.Unix()),
-		After:    int(build.TriggeredAt.Unix()) - 24*60*60
+		After:    int(build.TriggeredAt.Unix()) - 24*60*60,
 	}
 	switch build.buildType() {
 	case buildTypeTag:
