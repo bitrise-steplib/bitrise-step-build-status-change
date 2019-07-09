@@ -222,6 +222,8 @@ func main() {
 		failf("- Failed to get similar builds, error: %s", err)
 	}
 	log.Printf("%d builds found", len(similarBuilds))
+	log.Printf("similarBuilds %s", similarBuilds)
+	log.Printf("currentBuild %s", currentBuild)
 	log.Donef("- Done")
 	fmt.Println()
 
