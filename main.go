@@ -79,8 +79,6 @@ func (cfg config) getBuilds(f filter) (builds, error) {
 	req.Header.Add("accept", "application/json")
 	req.Header.Add("Authorization", string(cfg.AccessToken))
 
-	log.Printf("%s", req)
-	log.Printf("%s", req.URL.RawQuery)
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return nil, err
@@ -104,6 +102,8 @@ func (cfg config) getBuilds(f filter) (builds, error) {
 
 type filter struct {
 	Before           int    `url:"before,omitempty"`
+	After            int    `url:"after,omitempty"`
+	Limit            int    `url:"limit,omitempty"`
 	Branch           string `url:"branch,omitempty"`
 	SortBy           string `url:"sort_by,omitempty"`
 	Workflow         string `url:"workflow,omitempty"`
@@ -134,6 +134,7 @@ func (build build) generateFilter() filter {
 		Workflow: build.TriggeredWorkflow,
 		Branch:   build.Branch,
 		Before:   int(build.TriggeredAt.Unix()),
+		After:    int(build.TriggeredAt.Unix()) - 24*60*60
 	}
 	switch build.buildType() {
 	case buildTypeTag:
@@ -224,8 +225,6 @@ func main() {
 		failf("- Failed to get similar builds, error: %s", err)
 	}
 	log.Printf("%d builds found", len(similarBuilds))
-	log.Printf("similarBuilds %s", similarBuilds)
-	log.Printf("currentBuild %s", currentBuild)
 	log.Donef("- Done")
 	fmt.Println()
 
