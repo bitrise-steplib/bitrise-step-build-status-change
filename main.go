@@ -79,6 +79,8 @@ func (cfg config) getBuilds(f filter) (builds, error) {
 	req.Header.Add("accept", "application/json")
 	req.Header.Add("Authorization", string(cfg.AccessToken))
 
+	log.Printf("%s", req)
+	log.Printf("%s", req.URL.RawQuery)
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return nil, err
