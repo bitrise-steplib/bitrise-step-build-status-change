@@ -79,6 +79,9 @@ func (cfg config) getBuilds(f filter) (builds, error) {
 	req.Header.Add("accept", "application/json")
 	req.Header.Add("Authorization", string(cfg.AccessToken))
 
+	log.Printf("%s", req)
+	log.Printf("%s", req.URL.RawQuery)
+	
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return nil, err
@@ -225,6 +228,8 @@ func main() {
 		failf("- Failed to get similar builds, error: %s", err)
 	}
 	log.Printf("%d builds found", len(similarBuilds))
+	log.Printf("similarBuilds %s", similarBuilds)
+	log.Printf("currentBuild %s", currentBuild)
 	log.Donef("- Done")
 	fmt.Println()
 
