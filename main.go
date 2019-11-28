@@ -93,6 +93,8 @@ func (cfg config) getBuilds(f filter) (builds, error) {
 	if resp.StatusCode != 200 {
 		return builds{}, fmt.Errorf("invalid response status code: %d\nbody: %s", resp.StatusCode, string(body))
 	}
+	
+	log.Printf("%s", body)
 
 	var builds struct {
 		Data []build `json:"data"`
