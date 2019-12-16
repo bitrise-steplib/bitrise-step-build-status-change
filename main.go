@@ -38,7 +38,7 @@ type config struct {
 	BuildStatus         string          `env:"BITRISE_BUILD_STATUS,required"`
 	PreviousBuildStatus string          `env:"PREVIOUS_BUILD_STATUS"`
 	AccessToken         stepconf.Secret `env:"access_token,required"`
-	VerboseLog          bool            `env:"verbose_log,opt[yes,no]"`
+	VerboseLog          bool            `env:"verbose,opt[yes,no]"`
 }
 
 func (cfg config) getBuild() (build, error) {
