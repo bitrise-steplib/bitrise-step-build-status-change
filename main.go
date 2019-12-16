@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/http/httputil"
 	"os"
 	"time"
 
@@ -91,8 +92,11 @@ func (cfg config) getBuilds(f filter) (builds, error) {
 	req.Header.Add("accept", "application/json")
 	req.Header.Add("Authorization", string(cfg.AccessToken))
 
-	log.Debugf("getBuilds http request: %s", req)
-	log.Debugf("getBuilds http query: %s", req.URL.RawQuery)
+	requestBytes, err := httputil.DumpRequest(req, true)
+	if err != nil {
+		log.Warnf("failed to dump request: %s", err)
+	}
+	log.Debugf("Get builds raw request: %s", requestBytes)
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
@@ -112,7 +116,11 @@ func (cfg config) getBuilds(f filter) (builds, error) {
 		return builds{}, fmt.Errorf("invalid response status code: %d\nbody: %s", resp.StatusCode, string(body))
 	}
 
-	log.Printf("%s", body)
+	responseBytes, err := httputil.DumpResponse(resp, true)
+	if err != nil {
+		log.Warnf("failed to dump response, error: %s", err)
+	}
+	log.Debugf("Get builds raw response: %s", responseBytes)
 
 	var builds struct {
 		Data []build `json:"data"`
