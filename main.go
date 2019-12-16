@@ -37,6 +37,7 @@ type config struct {
 	BuildStatus         string          `env:"BITRISE_BUILD_STATUS,required"`
 	PreviousBuildStatus string          `env:"PREVIOUS_BUILD_STATUS"`
 	AccessToken         stepconf.Secret `env:"access_token,required"`
+	VerboseLog          bool            `env:"verbose_log,opt[yes,no]"`
 }
 
 func (cfg config) getBuild() (build, error) {
@@ -84,8 +85,8 @@ func (cfg config) getBuilds(f filter) (builds, error) {
 	req.Header.Add("accept", "application/json")
 	req.Header.Add("Authorization", string(cfg.AccessToken))
 
-	log.Printf("%s", req)
-	log.Printf("%s", req.URL.RawQuery)
+	log.Debugf("getBuilds http request: %s", req)
+	log.Debugf("getBuilds http query: %s", req.URL.RawQuery)
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
@@ -206,6 +207,7 @@ func main() {
 	}
 	stepconf.Print(cfg)
 	fmt.Println()
+	log.SetEnableDebugLog(cfg.VerboseLog)
 
 	if cfg.PreviousBuildStatus != "" {
 		log.Infof("Exporting environment variables:")
@@ -236,8 +238,8 @@ func main() {
 		failf("- Failed to get similar builds, error: %s", err)
 	}
 	log.Printf("%d builds found", len(similarBuilds))
-	log.Printf("similarBuilds %s", similarBuilds)
-	log.Printf("currentBuild %s", currentBuild)
+	log.Debugf("similarBuilds %s", similarBuilds)
+	log.Debugf("currentBuild %s", currentBuild)
 	log.Donef("- Done")
 	fmt.Println()
 
