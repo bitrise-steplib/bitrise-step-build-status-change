@@ -28,7 +28,9 @@ inputs:
       title: Enable verbose logging?
       summary: Enable debug level logging, if set to "yes".
       description: Enable debug logging, if set to "yes".
-      value_options: ["no", "yes"]
+      value_options:
+        - "no"
+        - "yes"
       is_required: true
 
 outputs:
