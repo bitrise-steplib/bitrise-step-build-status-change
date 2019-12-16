@@ -54,6 +54,12 @@ func (cfg config) getBuild() (build, error) {
 	if err != nil {
 		return build{}, err
 	}
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			log.Warnf("failed to close response (%s) body, error: %s", resp, err)
+		}
+	}()
+
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return build{}, err
@@ -92,6 +98,12 @@ func (cfg config) getBuilds(f filter) (builds, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			log.Warnf("failed to close response (%s) body, error: %s", resp, err)
+		}
+	}()
+
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
