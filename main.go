@@ -17,13 +17,18 @@ import (
 
 const (
 	baseURL                   = "https://api.bitrise.io/v0.1"
-	buildTypeTag              = "tag"
-	buildTypePush             = "push"
-	buildTypeManual           = "manual"
-	buildTypePullRequest      = "pull-request"
 	envKeyPreviousBuildStatus = "PREVIOUS_BUILD_STATUS"
 	envKeyBuildStatusChanged  = "BUILD_STATUS_CHANGED"
 	statusTextSuccessfulBuild = "success"
+)
+
+type buildType int
+
+const (
+	buildTypeTag buildType = iota
+	buildTypePush
+	buildTypeManual
+	buildTypePullRequest
 )
 
 type config struct {
@@ -81,7 +86,7 @@ func (cfg config) getBuilds(f filter) (builds, error) {
 
 	log.Printf("%s", req)
 	log.Printf("%s", req.URL.RawQuery)
-	
+
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return nil, err
@@ -93,7 +98,7 @@ func (cfg config) getBuilds(f filter) (builds, error) {
 	if resp.StatusCode != 200 {
 		return builds{}, fmt.Errorf("invalid response status code: %d\nbody: %s", resp.StatusCode, string(body))
 	}
-	
+
 	log.Printf("%s", body)
 
 	var builds struct {
@@ -153,11 +158,12 @@ func (build build) generateFilter() filter {
 	return f
 }
 
-func (build build) buildType() string {
+func (build build) buildType() buildType {
 	switch {
 	case build.Tag != "":
 		return buildTypeTag
-		case (build.PullRequestID != nil && *build.PullRequestID > 0) || (build.PullRequestTargetBranch != ""):
+	case (build.PullRequestID != nil && *build.PullRequestID > 0) ||
+		(build.PullRequestTargetBranch != ""):
 		return buildTypePullRequest
 	case build.CommitHash == "":
 		return buildTypeManual
