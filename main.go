@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/http/httputil"
 	"os"
 	"time"
 
@@ -17,13 +18,18 @@ import (
 
 const (
 	baseURL                   = "https://api.bitrise.io/v0.1"
-	buildTypeTag              = "tag"
-	buildTypePush             = "push"
-	buildTypeManual           = "manual"
-	buildTypePullRequest      = "pull-request"
 	envKeyPreviousBuildStatus = "PREVIOUS_BUILD_STATUS"
 	envKeyBuildStatusChanged  = "BUILD_STATUS_CHANGED"
 	statusTextSuccessfulBuild = "success"
+)
+
+type buildType int
+
+const (
+	buildTypeTag buildType = iota
+	buildTypePush
+	buildTypeManual
+	buildTypePullRequest
 )
 
 type config struct {
@@ -32,6 +38,7 @@ type config struct {
 	BuildStatus         string          `env:"BITRISE_BUILD_STATUS,required"`
 	PreviousBuildStatus string          `env:"PREVIOUS_BUILD_STATUS"`
 	AccessToken         stepconf.Secret `env:"access_token,required"`
+	VerboseLog          bool            `env:"verbose,opt[yes,no]"`
 }
 
 func (cfg config) getBuild() (build, error) {
@@ -48,6 +55,12 @@ func (cfg config) getBuild() (build, error) {
 	if err != nil {
 		return build{}, err
 	}
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			log.Warnf("failed to close response (%s) body, error: %s", resp, err)
+		}
+	}()
+
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return build{}, err
@@ -79,16 +92,38 @@ func (cfg config) getBuilds(f filter) (builds, error) {
 	req.Header.Add("accept", "application/json")
 	req.Header.Add("Authorization", string(cfg.AccessToken))
 
+	if cfg.VerboseLog {
+		requestBytes, err := httputil.DumpRequest(req, true)
+		if err != nil {
+			log.Warnf("failed to dump request: %s", err)
+		}
+		log.Debugf("Get builds raw request: %s", requestBytes)
+	}
+
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			log.Warnf("failed to close response (%s) body, error: %s", resp, err)
+		}
+	}()
+
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
 	if resp.StatusCode != 200 {
 		return builds{}, fmt.Errorf("invalid response status code: %d\nbody: %s", resp.StatusCode, string(body))
+	}
+
+	if cfg.VerboseLog {
+		responseBytes, err := httputil.DumpResponse(resp, true)
+		if err != nil {
+			log.Warnf("failed to dump response, error: %s", err)
+		}
+		log.Debugf("Get builds raw response: %s", responseBytes)
 	}
 
 	var builds struct {
@@ -102,6 +137,8 @@ func (cfg config) getBuilds(f filter) (builds, error) {
 
 type filter struct {
 	Before           int    `url:"before,omitempty"`
+	After            int    `url:"after,omitempty"`
+	Limit            int    `url:"limit,omitempty"`
 	Branch           string `url:"branch,omitempty"`
 	SortBy           string `url:"sort_by,omitempty"`
 	Workflow         string `url:"workflow,omitempty"`
@@ -132,6 +169,7 @@ func (build build) generateFilter() filter {
 		Workflow: build.TriggeredWorkflow,
 		Branch:   build.Branch,
 		Before:   int(build.TriggeredAt.Unix()),
+		After:    int(build.TriggeredAt.Unix()) - 24*60*60,
 	}
 	switch build.buildType() {
 	case buildTypeTag:
@@ -145,11 +183,12 @@ func (build build) generateFilter() filter {
 	return f
 }
 
-func (build build) buildType() string {
+func (build build) buildType() buildType {
 	switch {
 	case build.Tag != "":
 		return buildTypeTag
-	case *build.PullRequestID > 0 || (build.PullRequestTargetBranch != ""):
+	case (build.PullRequestID != nil && *build.PullRequestID > 0) ||
+		(build.PullRequestTargetBranch != ""):
 		return buildTypePullRequest
 	case build.CommitHash == "":
 		return buildTypeManual
@@ -192,6 +231,7 @@ func main() {
 	}
 	stepconf.Print(cfg)
 	fmt.Println()
+	log.SetEnableDebugLog(cfg.VerboseLog)
 
 	if cfg.PreviousBuildStatus != "" {
 		log.Infof("Exporting environment variables:")
@@ -222,6 +262,8 @@ func main() {
 		failf("- Failed to get similar builds, error: %s", err)
 	}
 	log.Printf("%d builds found", len(similarBuilds))
+	log.Debugf("similarBuilds %s", similarBuilds)
+	log.Debugf("currentBuild %s", currentBuild)
 	log.Donef("- Done")
 	fmt.Println()
 

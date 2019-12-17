@@ -23,6 +23,15 @@ inputs:
       description: Your access token for the account that has access to the Bitrise app.
       is_required: true
       is_sensitive: true
+  - verbose: "no"
+    opts:
+      title: Enable verbose logging?
+      summary: Enable debug level logging, if set to "yes".
+      description: Enable debug logging, if set to "yes".
+      value_options:
+        - "no"
+        - "yes"
+      is_required: true
 
 outputs:
   - BUILD_STATUS_CHANGED:

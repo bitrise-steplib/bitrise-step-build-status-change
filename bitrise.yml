@@ -19,6 +19,7 @@ workflows:
     - path::./:
         inputs:
         - access_token: $BITRISE_ACCESS_TOKEN
+        - verbose: "yes"
 
   audit-this-step:
     steps:
