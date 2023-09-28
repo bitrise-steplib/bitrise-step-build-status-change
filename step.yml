@@ -44,3 +44,8 @@ outputs:
       title: "Previous Build Status"
       summary: Status text of the previous build.
       description: Status text of the previous build.
+  - PREVIOUS_BUILD_SLUG:
+    opts:
+      title: "Previous Build Slug"
+      summary: The BITRISE_BUILD_SLUG of the previous build.
+      description: The BITRISE_BUILD_SLUG of the previous build.

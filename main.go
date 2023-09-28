@@ -20,6 +20,7 @@ const (
 	baseURL                   = "https://api.bitrise.io/v0.1"
 	envKeyPreviousBuildStatus = "PREVIOUS_BUILD_STATUS"
 	envKeyBuildStatusChanged  = "BUILD_STATUS_CHANGED"
+	envKeyPreviousBuildSlug   = "PREVIOUS_BUILD_SLUG"
 	statusTextSuccessfulBuild = "success"
 )
 
@@ -282,6 +283,11 @@ func main() {
 		failf("failed to export env: %s, error: %s", envKeyPreviousBuildStatus, err)
 	}
 	log.Printf("- %s=%s", envKeyPreviousBuildStatus, matchingPreviousBuild.StatusText)
+
+	if err := tools.ExportEnvironmentWithEnvman(envKeyPreviousBuildSlug, matchingPreviousBuild.Slug); err != nil {
+		failf("failed to export env: %s, error: %s", envKeyPreviousBuildSlug, err)
+	}
+	log.Printf("- %s=%s", envKeyPreviousBuildSlug, matchingPreviousBuild.Slug)
 
 	currentBuildFailed := cfg.BuildStatus != "0"
 	changed := fmt.Sprintf("%t", currentBuildFailed != previousBuildFailed)
