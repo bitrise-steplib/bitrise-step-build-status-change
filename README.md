@@ -15,6 +15,8 @@
     > True if the actual build status is different from the previous one.
 - PREVIOUS_BUILD_STATUS: Previous Build Status
     > Status text of the previous build.
+- PREVIOUS_BUILD_SLUG: Previous Build Slug
+    > The BITRISE_BUILD_SLUG of the previous build.
 
 ## Contribute
 
